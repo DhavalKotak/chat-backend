@@ -29,4 +29,31 @@ router.post('/request',(req, res) => {
     })
 })
 
+router.post('/declineRequest', (req, res) => {
+    const username = req.body.username
+    const sender = req.body.sender
+    const authHeader = req.headers.authorization
+    const token = authHeader.split(' ')[1]
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if(err){
+            res
+            .json({message: "Invalid Token!"})
+        }else if(user.user == username){
+            db.query(`DELETE FROM FRIENDREQUEST WHERE SENDER = '${sender}' AND RECEIVER = '${username}'`,(err, results) => {
+                if(err)
+                    res.status(500)
+                else{
+                    console.log(results)
+                    res
+                    .status(200)
+                }
+            })
+        }else{
+            res
+            .json({message: "Stolen Token"})
+        }
+    })
+
+})
+
 module.exports = router
