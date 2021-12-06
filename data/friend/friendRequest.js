@@ -23,6 +23,28 @@ router.post('/request',(req, res) => {
     }
 })
 
+router.post('/sendRequest',(req, res) => {
+    let username = req.body.user
+    let authHeader = req.headers.authorization
+    let token = authHeader.split(' ')[1]
+    const result = tokenVerify(token)
+    if(result === false){
+        res
+        .json({message: "Invalid Token!"})
+    }else{
+        db.query(`INSERT INTO FRIENDREQUEST VALUES ('${result.user}','${username}')`,(err, results) => {
+            if(err)
+                res.status(500)
+            else{
+                console.log(results)
+                res
+                .status(200)
+                .json({message: results})
+            }
+        })
+    }
+})
+
 router.post('/declineRequest', (req, res) => {
     let authHeader = req.headers.authorization
     let token = authHeader.split(' ')[1]
@@ -45,6 +67,7 @@ router.post('/declineRequest', (req, res) => {
 })
 
 router.post('/acceptRequest', (req, res) => {
+    let sender = req.body.sender
     let authHeader = req.headers.authorization
     let token = authHeader.split(' ')[1]
     const result = tokenVerify(token)
