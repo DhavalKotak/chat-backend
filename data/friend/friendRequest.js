@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const db = require('../db')
 const tokenVerify = require('../../api/auth/jwt')
+const { v4: uuidv4 } = require('uuid')
 
 router.post('/request',(req, res) => {
     let authHeader = req.headers.authorization
@@ -46,6 +47,7 @@ router.post('/sendRequest',(req, res) => {
 })
 
 router.post('/declineRequest', (req, res) => {
+    let sender = req.body.sender
     let authHeader = req.headers.authorization
     let token = authHeader.split(' ')[1]
     const result = tokenVerify(token)
@@ -74,7 +76,7 @@ router.post('/acceptRequest', (req, res) => {
     if(result === false){
         res.json({message: "Invalid Token!"})
     }else{
-        db.query(`INSERT INTO FRIENDLIST VALUES('${result.user}','${sender}')`,(err, results) => {
+        db.query(`INSERT INTO FRIENDLIST VALUES('${result.user}','${sender}','${uuidv4()}')`,(err, results) => {
             if(err){
                 res.status(500)
                 console.log(err)
